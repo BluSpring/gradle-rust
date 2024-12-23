@@ -29,9 +29,9 @@ group = Coordinates.GROUP
 version = Coordinates.VERSION
 
 // What JVM version should this project compile to
-val targetVersion = "1.8"
+val targetVersion = "17"
 // What JVM version this project is written in
-val sourceVersion = "1.8"
+val sourceVersion = "17"
 
 // Maven Repositories
 repositories {
@@ -230,12 +230,6 @@ gradlePlugin {
             implementationClass = "fr.stardustenterprises.gradle.rust.importer.ImporterPlugin"
         }
     }
-}
-
-pluginBundle {
-    vcsUrl = "https://github.com/${Coordinates.REPO_ID}"
-    website = "https://github.com/${Coordinates.REPO_ID}"
-    tags = listOf("rust", "rustlang", "cargo", "native", "wrapper")
 }
 
 publishing.publications {

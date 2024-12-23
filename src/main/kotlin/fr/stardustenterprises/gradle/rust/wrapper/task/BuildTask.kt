@@ -142,14 +142,14 @@ open class BuildTask : ConfigurableTask<WrapperExtension>() {
             currentOS != EnumOperatingSystem.MACOS
 
         try {
-            this.project.exec {
+            this.project.providers.exec {
                 it.commandLine(targetOpt.command)
                 it.args(args)
                 it.workingDir(this.workingDir)
                 it.environment(targetOpt.env)
                 it.standardOutput = BouncerOutputStream(System.out, stdout)
                 it.errorOutput = System.err
-            }.assertNormalExitValue()
+            }.result.get().assertNormalExitValue()
         } catch (throwable: Throwable) {
             if (isOsxCross) {
                 println(

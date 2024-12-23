@@ -11,7 +11,7 @@ class BouncerOutputStream(
     private var buffer = ByteArrayOutputStream()
 
     override fun write(b: Int) {
-        val char = Char(b)
+        val char = Char(b.toUShort())
         if (buffer.size() == 0 && char == '{') {
             skipNextFlush = true
         }
