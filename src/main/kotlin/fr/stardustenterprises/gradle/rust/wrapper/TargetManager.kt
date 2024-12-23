@@ -21,13 +21,13 @@ object TargetManager {
         val rustupCommand = wrapperExtension.rustupCommand.get()
 
         val stdout = ByteArrayOutputStream()
-        project.exec { exec ->
+        project.providers.exec { exec ->
             exec.commandLine(rustupCommand)
             exec.args("target", "list", "--installed")
             exec.workingDir(wrapperExtension.crate.get().asFile)
             exec.environment(wrapperExtension.env)
             exec.standardOutput = stdout
-        }.assertNormalExitValue()
+        }.result.get().assertNormalExitValue()
 
         val installed = stdout.toString().split("\n")
             .toMutableList()
@@ -43,12 +43,12 @@ object TargetManager {
             if (command.contains("cargo") &&
                 !command.contains("cross")
             ) {
-                project.exec { exec ->
+                project.providers.exec { exec ->
                     exec.commandLine(rustupCommand)
                     exec.args("target", "add", targetOptions.target)
                     exec.workingDir(wrapperExtension.crate.get().asFile)
                     exec.environment(wrapperExtension.env)
-                }.assertNormalExitValue()
+                }.result.get().assertNormalExitValue()
             }
         }
     }

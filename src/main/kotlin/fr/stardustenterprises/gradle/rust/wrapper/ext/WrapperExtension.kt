@@ -76,13 +76,13 @@ abstract class WrapperExtension
 
     private val _defaultTarget: TargetOptions by lazy {
         val stdout = ByteArrayOutputStream()
-        project.exec {
+        project.providers.exec {
             it.commandLine("rustup")
             it.args("default")
             it.workingDir(crate.asFile.getOrElse(project.projectDir))
             it.environment(emptyMap<String, Any>())
             it.standardOutput = stdout
-        }.assertNormalExitValue()
+        }.result.get().assertNormalExitValue()
 
         var targetOutput = stdout.toString()
             .replace("(default)", "")

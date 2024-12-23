@@ -16,7 +16,7 @@ open class WrappedTask(
         TargetManager.ensureTargetsInstalled(project, configuration)
 
         configuration.targets.forEach { target ->
-            project.exec {
+            project.providers.exec {
                 it.commandLine(target.command)
                 it.args(target.subcommand(command))
                 it.workingDir(
@@ -24,7 +24,7 @@ open class WrappedTask(
                         ?: throw RuntimeException("Invalid working dir.")
                 )
                 it.environment(target.env)
-            }.assertNormalExitValue()
+            }.result.get().assertNormalExitValue()
         }
     }
 }
