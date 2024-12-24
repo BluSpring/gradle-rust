@@ -17,19 +17,21 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
+import org.gradle.process.ExecOperations
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.file.Files
 import java.util.*
 import java.util.stream.Collectors
 import java.util.zip.ZipException
+import javax.inject.Inject
 import kotlin.io.path.Path
 import kotlin.io.path.absolute
 
 @Task(
     group = "rust", name = "build"
 )
-open class BuildTask : ConfigurableTask<WrapperExtension>() {
+open class BuildTask @Inject constructor(private var execOperations: ExecOperations) : ConfigurableTask<WrapperExtension>() {
     companion object {
         private val FORBIDDEN_SUFFIXES =
             arrayOf(
@@ -91,7 +93,7 @@ open class BuildTask : ConfigurableTask<WrapperExtension>() {
             throw RuntimeException("Please define at least one target.")
         }
 
-        TargetManager.ensureTargetsInstalled(project, configuration)
+        TargetManager.ensureTargetsInstalled(project, configuration, execOperations)
 
         val rustDir = this.project.buildDir.resolve("rust")
         FileUtils.deleteDirectory(rustDir)
@@ -142,14 +144,14 @@ open class BuildTask : ConfigurableTask<WrapperExtension>() {
             currentOS != EnumOperatingSystem.MACOS
 
         try {
-            this.project.providers.exec {
+            execOperations.exec {
                 it.commandLine(targetOpt.command)
                 it.args(args)
                 it.workingDir(this.workingDir)
                 it.environment(targetOpt.env)
                 it.standardOutput = BouncerOutputStream(System.out, stdout)
                 it.errorOutput = System.err
-            }.result.get().assertNormalExitValue()
+            }.assertNormalExitValue()
         } catch (throwable: Throwable) {
             if (isOsxCross) {
                 println(
@@ -160,6 +162,9 @@ open class BuildTask : ConfigurableTask<WrapperExtension>() {
                     "[gradle-rust] Ensure your .cargo/config.toml file is " +
                         "configured properly with the osxcross toolchains."
                 )
+            } else {
+                println("Failed to compile!")
+                throwable.printStackTrace()
             }
         }
 

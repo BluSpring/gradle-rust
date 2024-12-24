@@ -7,7 +7,7 @@ object Coordinates {
     const val REPO_ID = "stardust-enterprises/gradle-rust"
 
     const val GROUP = "fr.stardustenterprises.rust"
-    const val VERSION = "3.3.1"
+    const val VERSION = "3.3.3"
 }
 
 object Pom {

@@ -2,32 +2,36 @@ package fr.stardustenterprises.gradle.rust.wrapper
 
 import fr.stardustenterprises.gradle.rust.wrapper.ext.WrapperExtension
 import org.gradle.api.Project
+import org.gradle.process.ExecOperations
 import java.io.ByteArrayOutputStream
 
 object TargetManager {
     fun ensureTargetsInstalled(
         project: Project,
         wrapperExtension: WrapperExtension,
+        execOperations: ExecOperations
     ) {
         if (wrapperExtension.cargoInstallTargets.getOrElse(false)) {
-            installTargets(project, wrapperExtension)
+            installTargets(project, wrapperExtension, execOperations)
         }
     }
 
     private fun installTargets(
         project: Project,
         wrapperExtension: WrapperExtension,
+        execOperations: ExecOperations
     ) {
         val rustupCommand = wrapperExtension.rustupCommand.get()
 
         val stdout = ByteArrayOutputStream()
-        project.providers.exec { exec ->
+        execOperations.exec { exec ->
             exec.commandLine(rustupCommand)
             exec.args("target", "list", "--installed")
             exec.workingDir(wrapperExtension.crate.get().asFile)
             exec.environment(wrapperExtension.env)
             exec.standardOutput = stdout
-        }.result.get().assertNormalExitValue()
+        }
+            .assertNormalExitValue()
 
         val installed = stdout.toString().split("\n")
             .toMutableList()
